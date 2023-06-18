@@ -8,17 +8,50 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject var viewModel = ViewModel()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            List {
+                ForEach(viewModel.courses, id: \.self) { course in
+                    CourseView(course: course)
+                    
+                }
+            }
+            .navigationTitle("Courses")
+            .onAppear {
+                Task {
+                    await viewModel.getCourseData()
+                }
+            }
         }
-        .padding()
+        
     }
 }
 
 #Preview {
     ContentView()
+}
+
+struct CourseView: View {
+    
+    let course: Course
+    
+    var body: some View {
+        HStack {
+            AsyncImage(url: URL(string: course.image), content: { returnedImage in
+                returnedImage
+                    .resizable()
+                    .scaledToFit()
+            }, placeholder: {
+                ProgressView()
+            })
+            .frame(width: 130, height: 70)
+            
+            Text(course.name)
+                .bold()
+        }
+        .padding(3)
+    }
 }
